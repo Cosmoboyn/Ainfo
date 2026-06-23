@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Платформа развития ИИ «AInfo»</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #1e1e2e; color: #cdd6f4; margin: 0; padding: 20px; display: flex; justify-content: center; }
+        .chat-container { width: 100%; max-width: 600px; background: #252538; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.3); overflow: hidden; display: flex; flex-direction: column; height: 85vh; }
+        .header { background: #11111b; padding: 15px; text-align: center; font-size: 1.2rem; font-weight: bold; border-bottom: 2px solid #89b4fa; color: #89b4fa; }
+        .chat-box { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        .msg { padding: 10px 15px; border-radius: 8px; max-width: 80%; word-break: break-word; }
+        .user-msg { background: #89b4fa; color: #11111b; align-self: flex-end; }
+        .ai-msg { background: #45475a; color: #cdd6f4; align-self: flex-start; }
+        .system-msg { background: #313244; color: #a6e3a1; align-self: center; font-size: 0.9rem; text-align: center; width: 90%; }
+        .input-area { padding: 15px; background: #11111b; display: flex; gap: 10px; }
+        input { flex: 1; padding: 12px; border: none; border-radius: 6px; background: #313244; color: #cdd6f4; font-size: 1rem; }
+        input:focus { outline: 2px solid #89b4fa; }
+        button { padding: 12px 20px; border: none; border-radius: 6px; background: #89b4fa; color: #11111b; font-weight: bold; cursor: pointer; font-size: 1rem; }
+        button:hover { background: #b4befe; }
+        .feedback-area { display: none; padding: 10px; background: #181825; justify-content: center; gap: 15px; border-top: 1px solid #313244; }
+        .btn-feed { padding: 5px 15px; font-size: 0.9rem; }
+        .btn-good { background: #a6e3a1; }
+        .btn-bad { background: #f38ba8; }
+    </style>
+</head>
+<body>
+
+<div class="chat-container">
+    <div class="header">🧠 ПЛАТФОРМА ИИ «AInfo»</div>
+    <div class="chat-box" id="chatBox">
+        <div class="msg system-msg">[Система]: AInfo успешно загружен в браузере. Его синапсы готовы к обучению!</div>
+    </div>
+    
+    <div class="feedback-area" id="feedbackArea">
+        <span>Оцени ответ AInfo:</span>
+        <button class="btn-feed btn-good" onclick="handleFeedback(true)">👍 Верно (+)</button>
+        <button class="btn-feed btn-bad" onclick="handleFeedback(false)">👎 Ошибка (-)</button>
+    </div>
+
+    <div class="input-area">
+        <input type="text" id="userInput" placeholder="Напишите AInfo или пример (например, 25 + 12)..." onkeypress="checkEnter(event)">
+        <button onclick="sendMessage()">Отправить</button>
+    </div>
+</div>
+
+<script>
+    // Загрузка "мозга" из памяти браузера или создание базового
+    let brain = JSON.parse(localStorage.getItem('ai_brain')) || {
+        "привет": {"Привет! Я твое создание. Научи меня чему-нибудь.": 1.0},
+        "кто ты": {"Я развивающийся цифровой организм AInfo. Мой разум чист.": 1.0}
+    };
+    
+    let learningRate = 0.2;
+    let currentTrigger = null;
+    let currentResponse = null;
+    let isMathResult = false;
+    let awaitingHint = false;
+
+    function saveBrain() {
+        localStorage.setItem('ai_brain', JSON.stringify(brain));
+    }
+
+    function tokenize(text) {
+        return text.toLowerCase().replace(/[?!.,]/g, "").trim().split(/\s+/);
+    }
+
+    function analyticalMathCore(text) {
+        let match = text.match(/(\d+)\s*([\+\-])\s*(\d+)/);
+        if (match) {
+            let num1 = parseInt(match[1]);
+            let op = match[2];
+            let num2 = parseInt(match[3]);
+            let res = op === '+' ? num1 + num2 : num1 - num2;
+            return `${num1} ${op} ${num2} = ${res}`;
+        }
+        return null;
+    }
+
+    function findBestTrigger(userInput) {
+        let inputWords = tokenize(userInput);
+        if (inputWords.length === 0 || inputWords[0] === "") return null;
+        
+        let bestTrigger = null;
+        let maxScore = 0;
+        
+        for (let trigger in brain) {
+            let triggerWords = tokenize(trigger);
+            let intersection = inputWords.filter(x => triggerWords.includes(x));
+            if (intersection.length > maxScore) {
+                maxScore = intersection.length;
+                bestTrigger = trigger;
+            }
+        }
+        return bestTrigger;
+    }
+
+    function appendMessage(text, className) {
+        let chatBox = document.getElementById('chatBox');
+        let msgDiv = document.createElement('div');
+        msgDiv.className = `msg ${className}`;
+        msgDiv.innerText = text;
+        chatBox.appendChild(msgDiv);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function checkEnter(event) {
+        if (event.key === 'Enter') sendMessage();
+    }
+
+    function sendMessage() {
+        let inputEl = document.getElementById('userInput');
+        let text = inputEl.value.trim();
+        if (!text) return;
+
+        appendMessage(text, 'user-msg');
+        inputEl.value = '';
+
+        // Если ИИ ждал подсказку на предыдущем шаге
+        if (awaitingHint) {
+            if (currentTrigger) {
+                if (!brain[currentTrigger]) brain[currentTrigger] = {};
+                brain[currentTrigger][text] = (brain[currentTrigger][text] || 1.0) + learningRate;
+                saveBrain();
+                appendMessage(`[Система]: Подсказка принята. Внедряю знание: "${text}"`, 'system-msg');
+            } else {
+                // Если обучаем новой фразе с нуля
+                let lastUserPhrase = localStorage.getItem('last_unknown_phrase');
+                if (lastUserPhrase) {
+                    let cleanQ = lastUserPhrase.toLowerCase().replace(/[?!.,]/g, "").trim();
+                    brain[cleanQ] = {};
+                    brain[cleanQ][text] = 1.0;
+                    saveBrain();
+                    appendMessage(`[Система]: Новая концепция добавлена в мозг AInfo!`, 'system-msg');
+                }
+            }
+            awaitingHint = false;
+            currentTrigger = null;
+            document.getElementById('feedbackArea').style.display = 'none';
+            return;
+        }
+
+        // Проверка памяти
+        let trigger = findBestTrigger(text);
+        if (trigger && Object.keys(brain[trigger]).length > 0) {
+            let responses = brain[trigger];
+            let bestRes = Object.keys(responses).reduce((a, b) => responses[a] > responses[b] ? a : b);
+            
+            currentTrigger = trigger;
+            currentResponse = bestRes;
+            isMathResult = false;
+            
+            setTimeout(() => {
+                appendMessage(`AInfo: ${bestRes}`, 'ai-msg');
+                document.getElementById('feedbackArea').style.display = 'flex';
+            }, 400);
+            return;
+        }
+
+        // Проверка математики
+        let mathRes = analyticalMathCore(text);
+        if (mathRes) {
+            isMathResult = true;
+            setTimeout(() => {
+                appendMessage(`AInfo (вычислено): ${mathRes}`, 'ai-msg');
+            }, 400);
+            return;
+        }
+
+        // Если не знает
+        setTimeout(() => {
+            appendMessage(`AInfo: Я пока не знаю, как на это ответить. Дай мне подсказку.`, 'ai-msg');
+            localStorage.setItem('last_unknown_phrase', text);
+            awaitingHint = true;
+            currentTrigger = null;
+        }, 400);
+    }
+
+    function handleFeedback(isGood) {
+        document.getElementById('feedbackArea').style.display = 'none';
+        if (isMathResult) return;
+
+        if (isGood) {
+            brain[currentTrigger][currentResponse] += learningRate;
+            appendMessage("[Система]: Синапс укреплен. AInfo запомнил одобрение.", 'system-msg');
+            saveBrain();
+        } else {
+            brain[currentTrigger][currentResponse] -= learningRate;
+            if (brain[currentTrigger][currentResponse] <= 0) {
+                delete brain[currentTrigger][currentResponse];
+            }
+            saveBrain();
+            appendMessage("[Система]: Ошибка зафиксирована. Напиши следующим сообщением, как надо было ответить:", 'system-msg');
+            awaitingHint = true;
+        }
+    }
+</script>
+
+</body>
+</html>
