@@ -1,51 +1,237 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Платформа развития ИИ «AInfo»</title>
+    <title>AInfo Platform</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #1e1e2e; color: #cdd6f4; margin: 0; padding: 20px; display: flex; justify-content: center; }
-        .chat-container { width: 100%; max-width: 600px; background: #252538; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.3); overflow: hidden; display: flex; flex-direction: column; height: 85vh; }
-        .header { background: #11111b; padding: 15px; text-align: center; font-size: 1.2rem; font-weight: bold; border-bottom: 2px solid #89b4fa; color: #89b4fa; }
-        .chat-box { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-        .msg { padding: 10px 15px; border-radius: 8px; max-width: 80%; word-break: break-word; }
-        .user-msg { background: #89b4fa; color: #11111b; align-self: flex-end; }
-        .ai-msg { background: #45475a; color: #cdd6f4; align-self: flex-start; }
-        .system-msg { background: #313244; color: #a6e3a1; align-self: center; font-size: 0.9rem; text-align: center; width: 90%; }
-        .input-area { padding: 15px; background: #11111b; display: flex; gap: 10px; }
-        input { flex: 1; padding: 12px; border: none; border-radius: 6px; background: #313244; color: #cdd6f4; font-size: 1rem; }
-        input:focus { outline: 2px solid #89b4fa; }
-        button { padding: 12px 20px; border: none; border-radius: 6px; background: #89b4fa; color: #11111b; font-weight: bold; cursor: pointer; font-size: 1rem; }
-        button:hover { background: #b4befe; }
-        .feedback-area { display: none; padding: 10px; background: #181825; justify-content: center; gap: 15px; border-top: 1px solid #313244; }
-        .btn-feed { padding: 5px 15px; font-size: 0.9rem; }
-        .btn-good { background: #a6e3a1; }
-        .btn-bad { background: #f38ba8; }
+        /* Цветовые переменные для тем оформления (на основе твоего рисунка) */
+        :root {
+            --bg-main: #5c82b1;       /* Синий фон рамки */
+            --bg-panel: #cccccc;      /* Серые панели */
+            --text-main: #000000;     /* Черный текст */
+            --border-color: #000000;  /* Четкие контуры */
+            --btn-disabled: #8e8e8e;  /* Заблокированная кнопка */
+            --msg-user: #a3c2e0;
+            --msg-ai: #e0e0e0;
+        }
+
+        [data-theme="dark"] {
+            --bg-main: #1a1b26;       /* Темный фон */
+            --bg-panel: #242530;      /* Темные панели */
+            --text-main: #ffffff;     /* Белый текст */
+            --border-color: #444444;  
+            --btn-disabled: #3a3b45;  
+            --msg-user: #3d59a1;
+            --msg-ai: #414868;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: 'Courier New', Courier, monospace; /* В стиле минимализма */
+            background-color: var(--bg-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            padding: 20px;
+            color: var(--text-main);
+            transition: all 0.3s ease;
+        }
+
+        /* Главный контейнер-сетка */
+        .window-wrapper {
+            display: flex;
+            width: 100%;
+            max-width: 1200px;
+            height: 90vh;
+            gap: 15px;
+        }
+
+        /* ЛЕВАЯ ПАНЕЛЬ (Чат) */
+        .left-panel {
+            flex: 3;
+            background-color: var(--bg-panel);
+            border: 3px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+            position: relative;
+        }
+
+        .chat-box {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding-bottom: 70px;
+        }
+
+        .msg {
+            padding: 10px 15px;
+            border: 2px solid var(--border-color);
+            max-width: 75%;
+            word-break: break-word;
+            font-size: 1.1rem;
+        }
+        .user-msg { align-self: flex-end; background-color: var(--msg-user); }
+        .ai-msg { align-self: flex-start; background-color: var(--msg-ai); }
+        .system-msg { align-self: center; border-style: dashed; font-size: 0.9rem; text-align: center; width: 100%; }
+
+        /* Область ввода внизу левой панели */
+        .input-container {
+            position: absolute;
+            bottom: 15px;
+            left: 15px;
+            right: 15px;
+            display: flex;
+            border: 3px solid var(--border-color);
+            background: transparent;
+        }
+
+        .input-container input {
+            flex: 1;
+            border: none;
+            padding: 15px;
+            font-size: 1.2rem;
+            background: transparent;
+            color: var(--text-main);
+            outline: none;
+        }
+
+        .send-btn {
+            background: transparent;
+            border: none;
+            border-left: 3px solid var(--border-color);
+            padding: 0 25px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-main);
+        }
+        .send-btn:hover { background-color: rgba(0,0,0,0.1); }
+
+        /* ПРАВАЯ ПАНЕЛЬ (Инфо) */
+        .right-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            min-width: 280px;
+        }
+
+        /* Блок заголовка */
+        .info-top {
+            background-color: var(--bg-panel);
+            border: 3px solid var(--border-color);
+            padding: 20px;
+            position: relative;
+            flex: 2;
+        }
+
+        .beta-label {
+            position: absolute;
+            top: 10px;
+            right: 80px;
+            font-size: 0.9rem;
+        }
+
+        .brand-title {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        /* Кнопки управления вверху справа */
+        .window-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .ctrl-btn {
+            width: 35px;
+            height: 35px;
+            background: transparent;
+            border: 2px solid var(--border-color);
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .ctrl-btn:hover { background-color: rgba(0,0,0,0.1); }
+
+        /* Кнопка ИГРЫ (Недоступна) */
+        .games-btn {
+            background-color: var(--btn-disabled);
+            border: 3px solid var(--border-color);
+            padding: 15px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: rgba(0, 0, 0, 0.4);
+            cursor: not-allowed;
+            text-align: center;
+        }
+
+        /* Блок Мониторинга Памяти и Ядра */
+        .info-bottom {
+            background-color: var(--bg-panel);
+            border: 3px solid var(--border-color);
+            padding: 20px;
+            flex: 3;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .status-header {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
 
-<div class="chat-container">
-    <div class="header">🧠 ПЛАТФОРМА ИИ «AInfo»</div>
-    <div class="chat-box" id="chatBox">
-        <div class="msg system-msg">[Система]: AInfo успешно загружен в браузере. Его синапсы готовы к обучению!</div>
-    </div>
-    
-    <div class="feedback-area" id="feedbackArea">
-        <span>Оцени ответ AInfo:</span>
-        <button class="btn-feed btn-good" onclick="handleFeedback(true)">👍 Верно (+)</button>
-        <button class="btn-feed btn-bad" onclick="handleFeedback(false)">👎 Ошибка (-)</button>
+<div class="window-wrapper">
+    <div class="left-panel">
+        <div class="chat-box" id="chatBox">
+            <div class="msg system-msg">[Система]: Модули управления запущены.</div>
+        </div>
+        
+        <div class="input-container">
+            <input type="text" id="userInput" placeholder="Ввод..." onkeypress="checkEnter(event)">
+            <button class="send-btn" onclick="sendMessage()">➔</button>
+        </div>
     </div>
 
-    <div class="input-area">
-        <input type="text" id="userInput" placeholder="Напишите AInfo или пример (например, 25 + 12)..." onkeypress="checkEnter(event)">
-        <button onclick="sendMessage()">Отправить</button>
+    <div class="right-panel">
+        <div class="info-top">
+            <div class="beta-label">Beta</div>
+            <div class="brand-title">AInfo</div>
+            <div class="window-controls">
+                <button class="ctrl-btn" onclick="toggleTheme()" title="Сменить тему">⋮</button>
+                <button class="ctrl-btn" onclick="alert('Платформа AInfo Core. Управляйте и развивайте ассоциативные связи.')">i</button>
+            </div>
+        </div>
+
+        <button class="games-btn" disabled>Игры</button>
+
+        <div class="info-bottom">
+            <div class="status-header" id="statMemory">Память: --</div>
+            <div class="status-header" id="statCore">Ядро: Старт</div>
+        </div>
     </div>
 </div>
 
 <script>
-    // Загрузка "мозга" из памяти браузера или создание базового
+    // Подгрузка разума
     let brain = JSON.parse(localStorage.getItem('ai_brain')) || {
         "привет": {"Привет! Я твое создание. Научи меня чему-нибудь.": 1.0},
         "кто ты": {"Я развивающийся цифровой организм AInfo. Мой разум чист.": 1.0}
@@ -54,11 +240,28 @@
     let learningRate = 0.2;
     let currentTrigger = null;
     let currentResponse = null;
-    let isMathResult = false;
     let awaitingHint = false;
+
+    // Переключение тем (Светлая / Темная)
+    function toggleTheme() {
+        const html = document.documentElement;
+        const currentTheme = html.getAttribute('data-theme');
+        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+        html.setAttribute('data-theme', newTheme);
+    }
+
+    // Обновление показателей на боковой панели
+    function updateLiveStats(coreStatus) {
+        const keysCount = Object.keys(brain).length;
+        document.getElementById('statMemory').innerText = `Память: ${keysCount} связей`;
+        if (coreStatus) {
+            document.getElementById('statCore').innerText = `Ядро: ${coreStatus}`;
+        }
+    }
 
     function saveBrain() {
         localStorage.setItem('ai_brain', JSON.stringify(brain));
+        updateLiveStats();
     }
 
     function tokenize(text) {
@@ -116,27 +319,25 @@
         appendMessage(text, 'user-msg');
         inputEl.value = '';
 
-        // Если ИИ ждал подсказку на предыдущем шаге
         if (awaitingHint) {
             if (currentTrigger) {
                 if (!brain[currentTrigger]) brain[currentTrigger] = {};
                 brain[currentTrigger][text] = (brain[currentTrigger][text] || 1.0) + learningRate;
                 saveBrain();
-                appendMessage(`[Система]: Подсказка принята. Внедряю знание: "${text}"`, 'system-msg');
+                appendMessage(`[Система]: Значение успешно внедрено.`, 'system-msg');
             } else {
-                // Если обучаем новой фразе с нуля
                 let lastUserPhrase = localStorage.getItem('last_unknown_phrase');
                 if (lastUserPhrase) {
                     let cleanQ = lastUserPhrase.toLowerCase().replace(/[?!.,]/g, "").trim();
                     brain[cleanQ] = {};
                     brain[cleanQ][text] = 1.0;
                     saveBrain();
-                    appendMessage(`[Система]: Новая концепция добавлена в мозг AInfo!`, 'system-msg');
+                    appendMessage(`[Система]: Новая концепция добавлена.`, 'system-msg');
                 }
             }
             awaitingHint = false;
             currentTrigger = null;
-            document.getElementById('feedbackArea').style.display = 'none';
+            updateLiveStats("Анализ");
             return;
         }
 
@@ -148,52 +349,54 @@
             
             currentTrigger = trigger;
             currentResponse = bestRes;
-            isMathResult = false;
             
             setTimeout(() => {
                 appendMessage(`AInfo: ${bestRes}`, 'ai-msg');
-                document.getElementById('feedbackArea').style.display = 'flex';
-            }, 400);
+                updateLiveStats("Память");
+                appendMessage("[Система]: Отправь '+' для согласия или '-' для исправления.", 'system-msg');
+            }, 300);
             return;
         }
 
-        // Проверка математики
+        // Обработка похвалы / ошибок
+        if (text === '+' && currentTrigger && currentResponse) {
+            brain[currentTrigger][currentResponse] += learningRate;
+            saveBrain();
+            appendMessage("[Система]: Связь укреплена.", 'system-msg');
+            currentTrigger = null; currentResponse = null;
+            return;
+        } else if (text === '-' && currentTrigger && currentResponse) {
+            brain[currentTrigger][currentResponse] -= learningRate;
+            if (brain[currentTrigger][currentResponse] <= 0) delete brain[currentTrigger][currentResponse];
+            saveBrain();
+            appendMessage("[Система]: Ошибка учтена. Введи правильный ответ:", 'system-msg');
+            awaitingHint = true;
+            updateLiveStats("Обучение");
+            return;
+        }
+
+        // Проверка математического ядра
         let mathRes = analyticalMathCore(text);
         if (mathRes) {
-            isMathResult = true;
             setTimeout(() => {
-                appendMessage(`AInfo (вычислено): ${mathRes}`, 'ai-msg');
-            }, 400);
+                appendMessage(`AInfo (Вычислено): ${mathRes}`, 'ai-msg');
+                updateLiveStats("Вычисления");
+            }, 300);
             return;
         }
 
-        // Если не знает
+        // Если фраза незнакома
         setTimeout(() => {
-            appendMessage(`AInfo: Я пока не знаю, как на это ответить. Дай мне подсказку.`, 'ai-msg');
+            appendMessage(`AInfo: Неизвестный триггер. Дай подсказку (что ответить?).`, 'ai-msg');
             localStorage.setItem('last_unknown_phrase', text);
             awaitingHint = true;
             currentTrigger = null;
-        }, 400);
+            updateLiveStats("Ожидание");
+        }, 300);
     }
 
-    function handleFeedback(isGood) {
-        document.getElementById('feedbackArea').style.display = 'none';
-        if (isMathResult) return;
-
-        if (isGood) {
-            brain[currentTrigger][currentResponse] += learningRate;
-            appendMessage("[Система]: Синапс укреплен. AInfo запомнил одобрение.", 'system-msg');
-            saveBrain();
-        } else {
-            brain[currentTrigger][currentResponse] -= learningRate;
-            if (brain[currentTrigger][currentResponse] <= 0) {
-                delete brain[currentTrigger][currentResponse];
-            }
-            saveBrain();
-            appendMessage("[Система]: Ошибка зафиксирована. Напиши следующим сообщением, как надо было ответить:", 'system-msg');
-            awaitingHint = true;
-        }
-    }
+    // Первичный запуск мониторов панели
+    updateLiveStats("Готов");
 </script>
 
 </body>
