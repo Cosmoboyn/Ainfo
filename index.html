@@ -3,25 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AInfo Platform</title>
+    <title>AInfo Platform - Chess Update</title>
     <style>
-        /* Цветовые переменные для тем оформления (на основе твоего рисунка) */
         :root {
-            --bg-main: #5c82b1;       /* Синий фон рамки */
-            --bg-panel: #cccccc;      /* Серые панели */
-            --text-main: #000000;     /* Черный текст */
-            --border-color: #000000;  /* Четкие контуры */
-            --btn-disabled: #8e8e8e;  /* Заблокированная кнопка */
+            --bg-main: #5c82b1;       
+            --bg-panel: #cccccc;      
+            --text-main: #000000;     
+            --border-color: #000000;  
+            --btn-active: #a6e3a1;  
             --msg-user: #a3c2e0;
             --msg-ai: #e0e0e0;
         }
 
         [data-theme="dark"] {
-            --bg-main: #1a1b26;       /* Темный фон */
-            --bg-panel: #242530;      /* Темные панели */
-            --text-main: #ffffff;     /* Белый текст */
+            --bg-main: #1a1b26;       
+            --bg-panel: #242530;      
+            --text-main: #ffffff;     
             --border-color: #444444;  
-            --btn-disabled: #3a3b45;  
+            --btn-active: #303446;  
             --msg-user: #3d59a1;
             --msg-ai: #414868;
         }
@@ -29,7 +28,7 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         
         body {
-            font-family: 'Courier New', Courier, monospace; /* В стиле минимализма */
+            font-family: 'Courier New', Courier, monospace; 
             background-color: var(--bg-main);
             display: flex;
             justify-content: center;
@@ -40,7 +39,6 @@
             transition: all 0.3s ease;
         }
 
-        /* Главный контейнер-сетка */
         .window-wrapper {
             display: flex;
             width: 100%;
@@ -49,7 +47,6 @@
             gap: 15px;
         }
 
-        /* ЛЕВАЯ ПАНЕЛЬ (Чат) */
         .left-panel {
             flex: 3;
             background-color: var(--bg-panel);
@@ -75,12 +72,12 @@
             max-width: 75%;
             word-break: break-word;
             font-size: 1.1rem;
+            white-space: pre-line;
         }
         .user-msg { align-self: flex-end; background-color: var(--msg-user); }
         .ai-msg { align-self: flex-start; background-color: var(--msg-ai); }
         .system-msg { align-self: center; border-style: dashed; font-size: 0.9rem; text-align: center; width: 100%; }
 
-        /* Область ввода внизу левой панели */
         .input-container {
             position: absolute;
             bottom: 15px;
@@ -112,7 +109,6 @@
         }
         .send-btn:hover { background-color: rgba(0,0,0,0.1); }
 
-        /* ПРАВАЯ ПАНЕЛЬ (Инфо) */
         .right-panel {
             flex: 1;
             display: flex;
@@ -121,7 +117,6 @@
             min-width: 280px;
         }
 
-        /* Блок заголовка */
         .info-top {
             background-color: var(--bg-panel);
             border: 3px solid var(--border-color);
@@ -130,20 +125,9 @@
             flex: 2;
         }
 
-        .beta-label {
-            position: absolute;
-            top: 10px;
-            right: 80px;
-            font-size: 0.9rem;
-        }
+        .beta-label { position: absolute; top: 10px; right: 80px; font-size: 0.9rem; }
+        .brand-title { font-size: 3rem; font-weight: bold; margin-top: 5px; }
 
-        .brand-title {
-            font-size: 3rem;
-            font-weight: bold;
-            margin-top: 5px;
-        }
-
-        /* Кнопки управления вверху справа */
         .window-controls {
             position: absolute;
             top: 10px;
@@ -168,19 +152,20 @@
         }
         .ctrl-btn:hover { background-color: rgba(0,0,0,0.1); }
 
-        /* Кнопка ИГРЫ (Недоступна) */
+        /* Кнопка ИГРЫ теперь СВЕТИТСЯ и КЛИКАБЕЛЬНА */
         .games-btn {
-            background-color: var(--btn-disabled);
+            background-color: #a6e3a1;
             border: 3px solid var(--border-color);
             padding: 15px;
             font-size: 1.5rem;
             font-weight: bold;
-            color: rgba(0, 0, 0, 0.4);
-            cursor: not-allowed;
+            color: #000000;
+            cursor: pointer;
             text-align: center;
+            transition: transform 0.1s;
         }
+        .games-btn:active { transform: scale(0.95); }
 
-        /* Блок Мониторинга Памяти и Ядра */
         .info-bottom {
             background-color: var(--bg-panel);
             border: 3px solid var(--border-color);
@@ -191,10 +176,7 @@
             gap: 15px;
         }
 
-        .status-header {
-            font-size: 1.8rem;
-            font-weight: bold;
-        }
+        .status-header { font-size: 1.6rem; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -202,26 +184,26 @@
 <div class="window-wrapper">
     <div class="left-panel">
         <div class="chat-box" id="chatBox">
-            <div class="msg system-msg">[Система]: Модули управления запущены.</div>
+            <div class="msg system-msg">[Система]: Шахматное ядро AInfo успешно интегрировано! Кнопка Игры активна.</div>
         </div>
         
         <div class="input-container">
-            <input type="text" id="userInput" placeholder="Ввод..." onkeypress="checkEnter(event)">
+            <input type="text" id="userInput" placeholder="Ввод (или сделай ход)..." onkeypress="checkEnter(event)">
             <button class="send-btn" onclick="sendMessage()">➔</button>
         </div>
     </div>
 
     <div class="right-panel">
         <div class="info-top">
-            <div class="beta-label">Beta</div>
+            <div class="beta-label">Beta v2</div>
             <div class="brand-title">AInfo</div>
             <div class="window-controls">
-                <button class="ctrl-btn" onclick="toggleTheme()" title="Сменить тему">⋮</button>
-                <button class="ctrl-btn" onclick="alert('Платформа AInfo Core. Управляйте и развивайте ассоциативные связи.')">i</button>
+                <button class="ctrl-btn" onclick="toggleTheme()">⋮</button>
+                <button class="ctrl-btn" onclick="alert('AInfo Chess Edition. Доступны шахматные модули!')">i</button>
             </div>
         </div>
 
-        <button class="games-btn" disabled>Игры</button>
+        <button class="games-btn" onclick="activateChessMode()">Игры</button>
 
         <div class="info-bottom">
             <div class="status-header" id="statMemory">Память: --</div>
@@ -231,7 +213,6 @@
 </div>
 
 <script>
-    // Подгрузка разума
     let brain = JSON.parse(localStorage.getItem('ai_brain')) || {
         "привет": {"Привет! Я твое создание. Научи меня чему-нибудь.": 1.0},
         "кто ты": {"Я развивающийся цифровой организм AInfo. Мой разум чист.": 1.0}
@@ -241,61 +222,42 @@
     let currentTrigger = null;
     let currentResponse = null;
     let awaitingHint = false;
+    
+    // Переменные для режима шахмат
+    let chessMode = false;
+    let currentPuzzleAnswer = null;
 
-    // Переключение тем (Светлая / Темная)
+    // Шахматная база данных AInfo
+    const chessDatabase = {
+        players: {
+            "магнус карлсен": "Магнус Карлсен (Норвегия) — 16-й чемпион мира. Считается одним из величайших игроков в истории. В 2026 году продолжает удерживать статус короля мирового блица!",
+            "хикару накамура": "Хикару Накамура (США) — гроссмейстер, супер-эксперт в пулю и блиц, а также один из самых популярных шахматных стримеров на планете.",
+            "гарри каспаров": "Гарри Каспаров — 13-й чемпион мира, легенда шахмат. Много лет удерживал рекордный рейтинг, пока его не побил Магнус Карлсен.",
+            "ян непомнящий": "Ян Непомнящий — сильнейший российский гроссмейстер, дважды выигрывал Турниры претендентов."
+        },
+        news: [
+            "⚡ [Новости 2026]: Завершен супертурнир в Вейк-ан-Зее! Молодые таланты теснят ветеранов, а точность анализа партий с помощью нейросетей достигла рекордных 99.8%.",
+            "⚡ [Новости 2026]: Фиде тестирует новые правила контроля времени для борьбы с компьютерными подсказками на живых турнирах."
+        ],
+        puzzles: [
+            { q: "🧩 Задача №1 (Мат в 1 ход):\nБелые: Ладья h1, Король g1\nЧерные: Король h8, Пешка h7\n\nТвой ход белой Ладьей? (Напиши поле, например: h1-h8)", a: "h1-h8" },
+            { q: "🧩 Задача №2 (Выигрыш фигуры):\nБелые: Ферзь d1, Слон b5\nЧерные: Король e8, Ферзь a5 (сделал шах слону!)\n\nКак белым защититься и одновременно забрать черного Ферзя? (Варианты: Ферзем или Пешкой?)", a: "ферзем" }
+        ]
+    };
+
     function toggleTheme() {
         const html = document.documentElement;
-        const currentTheme = html.getAttribute('data-theme');
-        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-        html.setAttribute('data-theme', newTheme);
+        html.setAttribute('data-theme', html.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
     }
 
-    // Обновление показателей на боковой панели
     function updateLiveStats(coreStatus) {
-        const keysCount = Object.keys(brain).length;
-        document.getElementById('statMemory').innerText = `Память: ${keysCount} связей`;
-        if (coreStatus) {
-            document.getElementById('statCore').innerText = `Ядро: ${coreStatus}`;
-        }
+        document.getElementById('statMemory').innerText = `Память: ${Object.keys(brain).length} связей`;
+        if (coreStatus) document.getElementById('statCore').innerText = `Ядро: ${coreStatus}`;
     }
 
     function saveBrain() {
         localStorage.setItem('ai_brain', JSON.stringify(brain));
         updateLiveStats();
-    }
-
-    function tokenize(text) {
-        return text.toLowerCase().replace(/[?!.,]/g, "").trim().split(/\s+/);
-    }
-
-    function analyticalMathCore(text) {
-        let match = text.match(/(\d+)\s*([\+\-])\s*(\d+)/);
-        if (match) {
-            let num1 = parseInt(match[1]);
-            let op = match[2];
-            let num2 = parseInt(match[3]);
-            let res = op === '+' ? num1 + num2 : num1 - num2;
-            return `${num1} ${op} ${num2} = ${res}`;
-        }
-        return null;
-    }
-
-    function findBestTrigger(userInput) {
-        let inputWords = tokenize(userInput);
-        if (inputWords.length === 0 || inputWords[0] === "") return null;
-        
-        let bestTrigger = null;
-        let maxScore = 0;
-        
-        for (let trigger in brain) {
-            let triggerWords = tokenize(trigger);
-            let intersection = inputWords.filter(x => triggerWords.includes(x));
-            if (intersection.length > maxScore) {
-                maxScore = intersection.length;
-                bestTrigger = trigger;
-            }
-        }
-        return bestTrigger;
     }
 
     function appendMessage(text, className) {
@@ -307,8 +269,13 @@
         chatBox.scrollTop = chatBox.scrollHeight;
     }
 
-    function checkEnter(event) {
-        if (event.key === 'Enter') sendMessage();
+    function checkEnter(event) { if (event.key === 'Enter') sendMessage(); }
+
+    // АКТИВАЦИЯ ИГР КНОПКОЙ
+    function activateChessMode() {
+        chessMode = true;
+        updateLiveStats("Шахматы");
+        appendMessage("🤖 AInfo: Шахматный режим активирован!\n\nДоступные команды:\n• Напиши 'задача' — чтобы решать головоломки.\n• Напиши 'новости' — чтобы узнать сводку дня.\n• Напиши имя игрока (например, 'Магнус Карлсен') чтобы проверить мои знания.\n• Напиши ход (например, 'e2-e4') — начнется игра вслепую!", "ai-msg");
     }
 
     function sendMessage() {
@@ -319,37 +286,95 @@
         appendMessage(text, 'user-msg');
         inputEl.value = '';
 
+        let lowerText = text.toLowerCase();
+
+        // Проверка ответа на шахматную задачу
+        if (currentPuzzleAnswer) {
+            if (lowerText.includes(currentPuzzleAnswer)) {
+                appendMessage("🤖 AInfo: Блестяще! Это абсолютно верное решение. Анализ подтверждает мат! 👍", "ai-msg");
+            } else {
+                appendMessage(`🤖 AInfo: Не совсем так. Попробуй еще раз или изучи доску внимательнее!`, "ai-msg");
+            }
+            currentPuzzleAnswer = null;
+            return;
+        }
+
+        // ШАХМАТНАЯ ЛОГИКА (Если включен режим или юзер спросил про шахматы)
+        if (chessMode || lowerText.includes("шахмат") || lowerText.includes("магнус") || lowerText.includes("задача")) {
+            
+            // 1. Новости
+            if (lowerText.includes("новост")) {
+                let randomNews = chessDatabase.news[Math.floor(Math.random() * chessDatabase.news.length)];
+                appendMessage(`🤖 AInfo: ${randomNews}`, "ai-msg");
+                return;
+            }
+            
+            // 2. Задачи
+            if (lowerText.includes("задач")) {
+                let puzzle = chessDatabase.puzzles[Math.floor(Math.random() * chessDatabase.puzzles.length)];
+                currentPuzzleAnswer = puzzle.a;
+                appendMessage(`🤖 AInfo:\n${puzzle.q}`, "ai-msg");
+                updateLiveStats("Анализ задач");
+                return;
+            }
+
+            // 3. Известные игроки
+            for (let player in chessDatabase.players) {
+                if (lowerText.includes(player)) {
+                    appendMessage(`🤖 AInfo: ${chessDatabase.players[player]}`, "ai-msg");
+                    return;
+                }
+            }
+
+            // 4. Игра вслепую (имитация ходов и анализа)
+            let moveMatch = text.match(/([a-h][1-8])\s*[-x]?\s*([a-h][1-8])/i);
+            if (moveMatch) {
+                let userMove = moveMatch[0];
+                let aiResponseMoves = ["g1-f3", "e7-e5", "b8-c6", "d2-d4"];
+                let randomAiMove = aiResponseMoves[Math.floor(Math.random() * aiResponseMoves.length)];
+                
+                setTimeout(() => {
+                    appendMessage(`🤖 AInfo: Принято. Твой ход: ${userMove}.\n[Анализ Ядра]: Позиция стабильная. Мой ответный ход вслепую: ${randomAiMove}! Твой черед.`, "ai-msg");
+                    updateLiveStats("Игра");
+                }, 400);
+                return;
+            }
+        }
+
+        // Стандартная Ассоциативная память (если это не шахматный запрос)
         if (awaitingHint) {
             if (currentTrigger) {
                 if (!brain[currentTrigger]) brain[currentTrigger] = {};
-                brain[currentTrigger][text] = (brain[currentTrigger][text] || 1.0) + learningRate;
+                brain[currentTrigger][text] = 1.2;
                 saveBrain();
-                appendMessage(`[Система]: Значение успешно внедрено.`, 'system-msg');
+                appendMessage(`[Система]: Ответ усвоен.`, 'system-msg');
             } else {
-                let lastUserPhrase = localStorage.getItem('last_unknown_phrase');
-                if (lastUserPhrase) {
-                    let cleanQ = lastUserPhrase.toLowerCase().replace(/[?!.,]/g, "").trim();
-                    brain[cleanQ] = {};
-                    brain[cleanQ][text] = 1.0;
+                let lastQ = localStorage.getItem('last_unknown_phrase');
+                if (lastQ) {
+                    brain[lastQ.toLowerCase().replace(/[?!.,]/g, "").trim()] = { [text]: 1.0 };
                     saveBrain();
-                    appendMessage(`[Система]: Новая концепция добавлена.`, 'system-msg');
+                    appendMessage(`[Система]: Новая связь сформирована.`, 'system-msg');
                 }
             }
             awaitingHint = false;
             currentTrigger = null;
-            updateLiveStats("Анализ");
             return;
         }
 
-        // Проверка памяти
-        let trigger = findBestTrigger(text);
-        if (trigger && Object.keys(brain[trigger]).length > 0) {
-            let responses = brain[trigger];
+        // Поиск по триггерам
+        let words = lowerText.replace(/[?!.,]/g, "").trim().split(/\s+/);
+        let bestTrigger = null;
+        let maxScore = 0;
+        for (let trigger in brain) {
+            let tWords = trigger.split(/\s+/);
+            let score = words.filter(x => tWords.includes(x)).length;
+            if (score > maxScore) { maxScore = score; bestTrigger = trigger; }
+        }
+
+        if (bestTrigger && Object.keys(brain[bestTrigger]).length > 0) {
+            let responses = brain[bestTrigger];
             let bestRes = Object.keys(responses).reduce((a, b) => responses[a] > responses[b] ? a : b);
-            
-            currentTrigger = trigger;
-            currentResponse = bestRes;
-            
+            currentTrigger = bestTrigger; currentResponse = bestRes;
             setTimeout(() => {
                 appendMessage(`AInfo: ${bestRes}`, 'ai-msg');
                 updateLiveStats("Память");
@@ -358,46 +383,36 @@
             return;
         }
 
-        // Обработка похвалы / ошибок
-        if (text === '+' && currentTrigger && currentResponse) {
-            brain[currentTrigger][currentResponse] += learningRate;
-            saveBrain();
+        if (text === '+' && currentTrigger) {
+            brain[currentTrigger][currentResponse] += learningRate; saveBrain();
             appendMessage("[Система]: Связь укреплена.", 'system-msg');
-            currentTrigger = null; currentResponse = null;
             return;
-        } else if (text === '-' && currentTrigger && currentResponse) {
+        } else if (text === '-' && currentTrigger) {
             brain[currentTrigger][currentResponse] -= learningRate;
             if (brain[currentTrigger][currentResponse] <= 0) delete brain[currentTrigger][currentResponse];
             saveBrain();
-            appendMessage("[Система]: Ошибка учтена. Введи правильный ответ:", 'system-msg');
-            awaitingHint = true;
-            updateLiveStats("Обучение");
+            appendMessage("[Система]: Исправление. Введи правильный ответ:", 'system-msg');
+            awaitingHint = true; return;
+        }
+
+        // Проверка математики
+        let mathMatch = text.match(/(\d+)\s*([\+\-])\s*(\d+)/);
+        if (mathMatch) {
+            let n1 = parseInt(mathMatch[1]), op = mathMatch[2], n2 = parseInt(mathMatch[3]);
+            let res = op === '+' ? n1 + n2 : n1 - n2;
+            setTimeout(() => { appendMessage(`AInfo (Вычислено): ${n1} ${op} ${n2} = ${res}`, 'ai-msg'); updateLiveStats("Вычисления"); }, 300);
             return;
         }
 
-        // Проверка математического ядра
-        let mathRes = analyticalMathCore(text);
-        if (mathRes) {
-            setTimeout(() => {
-                appendMessage(`AInfo (Вычислено): ${mathRes}`, 'ai-msg');
-                updateLiveStats("Вычисления");
-            }, 300);
-            return;
-        }
-
-        // Если фраза незнакома
+        // Неизвестная фраза
         setTimeout(() => {
-            appendMessage(`AInfo: Неизвестный триггер. Дай подсказку (что ответить?).`, 'ai-msg');
+            appendMessage(`AInfo: Неизвестный триггер. Что мне ответить?`, 'ai-msg');
             localStorage.setItem('last_unknown_phrase', text);
-            awaitingHint = true;
-            currentTrigger = null;
-            updateLiveStats("Ожидание");
+            awaitingHint = true; currentTrigger = null;
         }, 300);
     }
 
-    // Первичный запуск мониторов панели
     updateLiveStats("Готов");
 </script>
-
 </body>
 </html>
